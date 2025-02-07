@@ -10,7 +10,7 @@ def mod_exp(base, exp, mod):
 
 def generate_safe_prime(bits):
   while True:
-    q = getPrime(bits - 1)
+    q = getPrime(bits)
     p = 2 * q + 1
     if isPrime(p):
       return p, q
