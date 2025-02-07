@@ -1,0 +1,1 @@
+This project is an implementation of Neff's [shuffle](https://web.cs.ucdavis.edu/~franklin/ecs228/2013/neff_2001.pdf). It is r_i is slightly different (mathematically same as the paper) r_i = theta_i + (-1)^{i + 1} * gamma * pi_{j = 0}_i (x_i * y_i^{-1}).  ![Neff Shuffle Diagram](math.png).
