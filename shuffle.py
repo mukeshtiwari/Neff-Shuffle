@@ -142,6 +142,8 @@ def simple_k_shuffle_proof(p : int, X : List[int], Y : List[int], x : List [int]
   # 3 P and V execute the SILPP for the two length 2k vectors
   Xret = X_hat + [C] * k  # φ
   Yret = Y_hat + [D] * k  # ψ
+  # adjust the x and y values according to X_hat and Y_hat
+  # X_hat_i = g^{x_i - d * t} and Y_hat_i = g^{y_i - c * t} 
   x_hat_logs = [(xi - d * t) % q for xi in x]
   y_hat_logs = [(yi - c * t) % q for yi in y]
   xret = x_hat_logs + [c] * k
@@ -170,6 +172,10 @@ c, d = (getRandomRange(1, q) for _ in range(2))
 x = [getRandomRange(1, q) for _ in range(N)]
 permutation = [i for i in range(N)]
 random.shuffle(permutation)
+# Y_i^d = X_{π(i)}^c
+# g^{y_i * d} = g^{x_{π(i)}^c} 
+# g^y_i = g^{c * x_{π(i)} * d^{-1}}
+# y_i = (c * x_{π(i)} * d^{-1}) mod q
 y = [(c * x[permutation[i]] * mod_exp(d, -1, q)) % q for i in range(N)]
 X = [pow(g, x[i], p) for i in range(N)]
 Y = [pow(g, y[i], p) for i in range(N)]
@@ -179,5 +185,8 @@ C, D, A, r = simple_k_shuffle_proof(p, X, Y, x, y, c, d, t, gamma)
 print(simple_k_shuffle_verification(p, X, Y, A, r, C, D, t, gamma))
 
 # End of simple k-shuffle protocol
+
+
+
 
 
