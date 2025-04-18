@@ -1,6 +1,6 @@
 from Crypto.Util.number import getPrime, getRandomRange, isPrime
-from typing import List, Tuple 
-from functools import reduce
+from typing import List, Tuple
+import random
 
 
 # Helper functions
@@ -24,7 +24,7 @@ def generate_parameters(bits):
   assert pow(g, q, p) == 1
   return p, q, g
 
-
+# Beginning of ILMPP protocol
 # Prover knows: x_i = log_g X_i, y_i = log_g Y_i
 def ilmpp_proof(p : int, q : int, X : List[int], Y : List[int], x : List[int], y : List[int], gamma : int) -> Tuple[List[int], List[int]] :
   k = len(X)
@@ -94,10 +94,10 @@ gamma = getRandomRange(1, q)
 A, r = ilmpp_proof(p, q, X, Y, x, y, gamma)
 print(ilmpp_verification(p, X, Y, A, r, gamma))
 
+# end of ILMPP protocol
 
 
-# simple k-shuffle protocol 
-# It is not working yet but commiting it before going to bed 
+# Beginning of simple k-shuffle protocol
 
 # Commitment function
 def commitment(p : int, g : int, c : int) -> int : 
@@ -140,28 +140,44 @@ def simple_k_shuffle_proof(p : int, X : List[int], Y : List[int], x : List [int]
   Y_hat = compute_hat(p, Y, W) # Y_hat = Y * W^-1 mod p
 
   # 3 P and V execute the SILPP for the two length 2k vectors
-  Xret = X_hat + [C] * k 
-  Yret = Y_hat + [D] * k
-  xret = x + [c] * k
-  yret = y + [d] * k
+  Xret = X_hat + [C] * k  # φ
+  Yret = Y_hat + [D] * k  # ψ
+  x_hat_logs = [(xi - d * t) % q for xi in x]
+  y_hat_logs = [(yi - c * t) % q for yi in y]
+  xret = x_hat_logs + [c] * k
+  yret = y_hat_logs + [d] * k
   A, r = ilmpp_proof(p, q, Xret, Yret, xret, yret, gamma)
 
-  return Xret, Yret, A, r 
+  return C, D, A, r 
 
-def simple_k_shuffle_verification(p : int, X : List[int], Y : List[int], A : List[int], r : List[int], gamma : int) -> bool:
-  return ilmpp_verification(p, X, Y, A, r, gamma) 
+def simple_k_shuffle_verification(p : int, X : List[int], Y : List[int], A : List[int], r : List[int], C : int, D : int, t : int, gamma : int) -> bool:
+  k = len(X)
+  assert len(Y) == k
+  assert len(A) == (2 * k)
+  assert len(r) == (2 * k - 1)
+  U = commitment(p, D, t)  # U = D^t mod p 
+  W = commitment(p, C, t) # W = C^t mod p
+  X_hat = compute_hat(p, X, U) # X_hat = X * U^-1 mod p
+  Y_hat = compute_hat(p, Y, W) # Y_hat = Y * W^-1 mod p
+  Xret = X_hat + [C] * k  # φ
+  Yret = Y_hat + [D] * k  # ψ
+  return ilmpp_verification(p, Xret, Yret, A, r, gamma) 
 
 #Testing code
 p, q, g = generate_parameters(100)
 N = 100
+c, d = (getRandomRange(1, q) for _ in range(2))
 x = [getRandomRange(1, q) for _ in range(N)]
-permutation = [i for i in range(N)] 
-y = [x[permutation[i]] for i in range(N)]
+permutation = [i for i in range(N)]
+random.shuffle(permutation)
+y = [(c * x[permutation[i]] * mod_exp(d, -1, q)) % q for i in range(N)]
 X = [pow(g, x[i], p) for i in range(N)]
 Y = [pow(g, y[i], p) for i in range(N)]
-c, d = (getRandomRange(1, q) for _ in range(2))
 t = getRandomRange(1, q)
 gamma = getRandomRange(1, q)
-Xret, Yret, A, r = simple_k_shuffle_proof(p, X, Y, x, y, c, d, t, gamma)
-print(simple_k_shuffle_verification(p, Xret, Yret, A, r, gamma))
+C, D, A, r = simple_k_shuffle_proof(p, X, Y, x, y, c, d, t, gamma)
+print(simple_k_shuffle_verification(p, X, Y, A, r, C, D, t, gamma))
+
+# End of simple k-shuffle protocol
+
 
