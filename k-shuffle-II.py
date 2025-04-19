@@ -68,7 +68,7 @@ def simple_k_shuffle_proof_II(p : int, q : int, g : int,
   return C, D, B, T, s, A, r
 
 
-def simple_k_shuffle_verify_II(p : int, X : List[int], Y : List[int], 
+def simple_k_shuffle_verify_II(p : int, g : int, X : List[int], Y : List[int], 
   B : int, T : int, s : int,
   C : int, D : int, A : List[int], r : List[int], lam : int, 
   t : int, gamma : int) -> bool:
@@ -95,7 +95,7 @@ def simple_k_shuffle_verify_II(p : int, X : List[int], Y : List[int],
     lhs = (mod_exp(X_hat[i], r[i-1], p) * mod_exp(Y_hat[i], r[i], p)) % p
     ret = ret & (lhs == A[i])
 
-  # Check last equation: X̃_k^{r_{k-1}} = A_k * Ŷ_k^{(-1)^k * γ}
+  # Check last equation: X̃_k^{r_{k-1}} = A_k * Ŷ_k^{(-1)^k * γ}  
   lhs = mod_exp(g, r[-1], p)
   term = (B * mod_exp(T, lam, p) * mod_exp(g, -s, p)) % p
   rhs = (A[-1] * mod_exp(term, ((-1)**k) * gamma, p)) % p
@@ -104,29 +104,29 @@ def simple_k_shuffle_verify_II(p : int, X : List[int], Y : List[int],
   return ret
 
 
-# simple_k_shuffle_proof_II(p : int, q : int, g : int,
- # X : List[int], Y : List[int], x : List[int], y : List[int],
- # c : int, d : int, beta : int, tau : int, lam : int, t : int, 
- # gamma : int)
-# Testing code
-p, q, g = generate_parameters(100)
-N = 100
-c, d = (getRandomRange(1, q) for _ in range(2))
-x = [getRandomRange(1, q) for _ in range(N)]
-permutation = [i for i in range(N)]
-random.shuffle(permutation)
-# Y_i^d = X_{π(i)}^c
-# g^{y_i * d} = g^{x_{π(i)}^c}
-# g^y_i = g^{c * x_{π(i)} * d^{-1}}
-# y_i = (c * x_{π(i)} * d^{-1}) mod q
-y = [(c * x[permutation[i]] * mod_exp(d, -1, q)) % q for i in range(N)]
-X = [pow(g, x[i], p) for i in range(N)]
-Y = [pow(g, y[i], p) for i in range(N)]
-beta, tau, lam = (getRandomRange(1, q) for _ in range(3))
-t = getRandomRange(1, q)
-gamma = getRandomRange(1, q)
-C, D, B, T, s, A, r = simple_k_shuffle_proof_II(p, q, g,
-  X, Y, x, y, c, d, beta, tau, lam, t, gamma)
-print(simple_k_shuffle_verify_II(p,
-  X, Y, B, T, s, C, D, A, r, lam, t, gamma))
-# End of k-shuffle protocol II    
+def main():
+  # Testing code
+  p, q, g = generate_parameters(100)
+  N = 100
+  c, d = (getRandomRange(1, q) for _ in range(2))
+  x = [getRandomRange(1, q) for _ in range(N)]
+  permutation = [i for i in range(N)]
+  random.shuffle(permutation)
+  # Y_i^d = X_{π(i)}^c
+  # g^{y_i * d} = g^{x_{π(i)}^c}
+  # g^y_i = g^{c * x_{π(i)} * d^{-1}}
+  # y_i = (c * x_{π(i)} * d^{-1}) mod q
+  y = [(c * x[permutation[i]] * mod_exp(d, -1, q)) % q for i in range(N)]
+  X = [pow(g, x[i], p) for i in range(N)]
+  Y = [pow(g, y[i], p) for i in range(N)]
+  beta, tau, lam = (getRandomRange(1, q) for _ in range(3))
+  t = getRandomRange(1, q)
+  gamma = getRandomRange(1, q)
+  C, D, B, T, s, A, r = simple_k_shuffle_proof_II(p, q, g,
+    X, Y, x, y, c, d, beta, tau, lam, t, gamma)
+  print(simple_k_shuffle_verify_II(p, g, 
+    X, Y, B, T, s, C, D, A, r, lam, t, gamma))
+  
+if __name__ == "__main__":
+  main()
+  # End of k-shuffle protocol II    

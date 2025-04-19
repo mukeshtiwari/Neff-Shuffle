@@ -50,29 +50,31 @@ def ilmpp_verification(p : int,  X : List[int], Y : List[int],
   return ret
 
     
+def main():
+  # Example usage
+  p, q, g = generate_parameters(100)
+  N = 100 
+  x = [getRandomRange(1, q) for _ in range(N)]
+  y = [e for e in x]
+  c, d, e, f, gg, h = (getRandomRange(1, q) for _ in range(6))
+  x[0] *= c
+  x[7] *= d
+  x[2] *= e
+  x[0] *= f
+  x[0] *= gg
+  x[3] *= h
+  y[1] *= c
+  y[9] *= d
+  y[2] *= e
+  y[5] *= f
+  y[8] *= gg
+  y[8] *= h 
+  X = [pow(g, x[i], p) for i in range(N)]
+  Y = [pow(g, y[i], p) for i in range(N)]
+  gamma = getRandomRange(1, q)
+  A, r = ilmpp_proof(p, q, X, Y, x, y, gamma)
+  print(ilmpp_verification(p, X, Y, A, r, gamma))
 
-#Testing code     
-p, q, g = generate_parameters(100)
-N = 100 
-x = [getRandomRange(1, q) for _ in range(N)]
-y = [e for e in x]
-c, d, e, f, gg, h = (getRandomRange(1, q) for _ in range(6))
-x[0] *= c
-x[7] *= d
-x[2] *= e
-x[0] *= f
-x[0] *= gg
-x[3] *= h
-y[1] *= c
-y[9] *= d
-y[2] *= e
-y[5] *= f
-y[8] *= gg
-y[8] *= h 
-X = [pow(g, x[i], p) for i in range(N)]
-Y = [pow(g, y[i], p) for i in range(N)]
-gamma = getRandomRange(1, q)
-A, r = ilmpp_proof(p, q, X, Y, x, y, gamma)
-print(ilmpp_verification(p, X, Y, A, r, gamma))
-
+if __name__ == "__main__":
+  main()
 # end of ILMPP protocol

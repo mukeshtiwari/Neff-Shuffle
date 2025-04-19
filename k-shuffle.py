@@ -26,7 +26,7 @@ def compute_hat(p : int, X : List[int], U : int) -> List[int]:
 # that Y_{i}^d = X_{π(i)}^c for all i ∈ {1, . . . , k}.
 
 
-def simple_k_shuffle_proof(p : int, X : List[int], Y : List[int], 
+def simple_k_shuffle_proof(p : int, q : int, g : int, X : List[int], Y : List[int], 
   x : List [int], y : List [int], c : int, d : int, t : int, gamma : int) -> Tuple[List[int], List[int]] : 
   k = len(X)
   assert len(Y) == k
@@ -60,6 +60,7 @@ def simple_k_shuffle_proof(p : int, X : List[int], Y : List[int],
 
   return C, D, A, r 
 
+
 def simple_k_shuffle_verification(p : int, X : List[int], Y : List[int], 
   A : List[int], r : List[int], C : int, D : int, t : int, gamma : int) -> bool:
   k = len(X)
@@ -75,22 +76,25 @@ def simple_k_shuffle_verification(p : int, X : List[int], Y : List[int],
   return ilmpp_verification(p, Xret, Yret, A, r, gamma) 
 
 #Testing code
-p, q, g = generate_parameters(100)
-N = 100
-c, d = (getRandomRange(1, q) for _ in range(2))
-x = [getRandomRange(1, q) for _ in range(N)]
-permutation = [i for i in range(N)]
-random.shuffle(permutation)
-# Y_i^d = X_{π(i)}^c
-# g^{y_i * d} = g^{x_{π(i)}^c} 
-# g^y_i = g^{c * x_{π(i)} * d^{-1}}
-# y_i = (c * x_{π(i)} * d^{-1}) mod q
-y = [(c * x[permutation[i]] * mod_exp(d, -1, q)) % q for i in range(N)]
-X = [pow(g, x[i], p) for i in range(N)]
-Y = [pow(g, y[i], p) for i in range(N)]
-t = getRandomRange(1, q)
-gamma = getRandomRange(1, q)
-C, D, A, r = simple_k_shuffle_proof(p, X, Y, x, y, c, d, t, gamma)
-print(simple_k_shuffle_verification(p, X, Y, A, r, C, D, t, gamma))
+def main():
+  p, q, g = generate_parameters(100)
+  N = 100
+  c, d = (getRandomRange(1, q) for _ in range(2))
+  x = [getRandomRange(1, q) for _ in range(N)]
+  permutation = [i for i in range(N)]
+  random.shuffle(permutation)
+  # Y_i^d = X_{π(i)}^c
+  # g^{y_i * d} = g^{x_{π(i)}^c} 
+  # g^y_i = g^{c * x_{π(i)} * d^{-1}}
+  # y_i = (c * x_{π(i)} * d^{-1}) mod q
+  y = [(c * x[permutation[i]] * mod_exp(d, -1, q)) % q for i in range(N)]
+  X = [pow(g, x[i], p) for i in range(N)]
+  Y = [pow(g, y[i], p) for i in range(N)]
+  t = getRandomRange(1, q)
+  gamma = getRandomRange(1, q)
+  C, D, A, r = simple_k_shuffle_proof(p, q, g, X, Y, x, y, c, d, t, gamma)
+  print(simple_k_shuffle_verification(p, X, Y, A, r, C, D, t, gamma))
 
+if __name__ == "__main__":
+  main()
 # End of simple k-shuffle protocol
