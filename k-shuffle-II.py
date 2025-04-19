@@ -21,6 +21,10 @@ def simple_k_shuffle_proof_II(p : int, q : int, g : int,
   B = mod_exp(g, beta, p)  # B = g^β
   T = mod_exp(g, tau, p)   # T = g^τ
 
+  # Step 2: V generates a random λ from Zq and reveals it to P.
+  # lam = getRandomRange(1, q)
+
+
   # Step 3: Prover computes s = β + λτ - (d/c)^k mod q
   d_over_c =(d * mod_exp(c, -1, q)) % q  # d/c mod q
   s = (beta + lam * tau - mod_exp(d_over_c, k, q)) % q
@@ -34,8 +38,8 @@ def simple_k_shuffle_proof_II(p : int, q : int, g : int,
   U = mod_exp(D, t, p)  # U = D^t
   W = mod_exp(C, t, p)  # W = C^t
 
-  X_hat = [(X[i] * pow(U, -1, p)) % p for i in range(k)]  # X̃_i = X_i / U
-  Y_hat = [(Y[i] * pow(W, -1, p)) % p for i in range(k)]  # Ŷ_i = Y_i / W
+  X_hat = [(X[i] * mod_exp(U, -1, p)) % p for i in range(k)]  # X̃_i = X_i / U
+  Y_hat = [(Y[i] * mod_exp(W, -1, p)) % p for i in range(k)]  # Ŷ_i = Y_i / W
 
   # Step 6: Prover generates θ_1,...,θ_k and computes A_1,...,A_{k+1}
   theta = [getRandomRange(1, q) for _ in range(k)]
@@ -54,7 +58,7 @@ def simple_k_shuffle_proof_II(p : int, q : int, g : int,
   acc = 1
   for i in range(k):
     # Compute r_i = θ_i + sign * acc (mod q)
-    acc = (acc * (y[i] * mod_exp(x[i], -1, q))) % q  # acc *= (x_i / y_i)
+    acc = (acc * (((x[i] - d * t) % q) * mod_exp((y[i] - c * t) % q, -1, q))) % q  # acc *= (x_i / y_i)
     r_i = (theta[i] + sign * acc) % q
     r.append(r_i)
     sign = -sign
@@ -115,7 +119,6 @@ random.shuffle(permutation)
 # g^{y_i * d} = g^{x_{π(i)}^c}
 # g^y_i = g^{c * x_{π(i)} * d^{-1}}
 # y_i = (c * x_{π(i)} * d^{-1}) mod q
-# y = [(c * x[permutation[i]] * mod_exp(d, -1, q)) % q for i in range(N)]
 y = [(c * x[permutation[i]] * mod_exp(d, -1, q)) % q for i in range(N)]
 X = [pow(g, x[i], p) for i in range(N)]
 Y = [pow(g, y[i], p) for i in range(N)]
